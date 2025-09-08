@@ -21,6 +21,7 @@ public class AttendanceService {
     private final AttendanceRepository attendanceRepository;
     private final AttendanceValidationRepository attendanceValidationRepository;
     private final UserRepository userRepository;
+    private final AuditService auditService;
 
     @Transactional
     public void validate(Long attendanceId, Authentication auth) {
@@ -36,6 +37,7 @@ public class AttendanceService {
         av.setDecision(ValidationDecision.validar);
         av.setValidatedAt(Instant.now().toString());
         attendanceValidationRepository.save(av);
+        auditService.log(auth, "validate_attendance", "attendance", att.getId(), null);
     }
 
     @Transactional
@@ -52,5 +54,6 @@ public class AttendanceService {
         av.setDecision(ValidationDecision.rejeitar);
         av.setValidatedAt(Instant.now().toString());
         attendanceValidationRepository.save(av);
+        auditService.log(auth, "reject_attendance", "attendance", att.getId(), null);
     }
 }
