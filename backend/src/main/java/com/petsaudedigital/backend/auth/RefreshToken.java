@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
+import com.petsaudedigital.backend.config.InstantStringConverter;
 import java.util.UUID;
 
 @Entity
@@ -27,12 +28,14 @@ public class RefreshToken {
     @JdbcTypeCode(SqlTypes.VARCHAR)
     private UUID jti;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
+    @Convert(converter = InstantStringConverter.class)
     private Instant expiresAt;
 
     @Column(nullable = false)
     private boolean revoked = false;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
+    @Convert(converter = InstantStringConverter.class)
     private Instant createdAt = Instant.now();
 }

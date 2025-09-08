@@ -10,6 +10,7 @@ import com.petsaudedigital.backend.repository.AttendanceValidationRepository;
 import com.petsaudedigital.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -21,6 +22,7 @@ public class AttendanceService {
     private final AttendanceValidationRepository attendanceValidationRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public void validate(Long attendanceId, Authentication auth) {
         Attendance att = attendanceRepository.findById(attendanceId).orElseThrow();
         User validator = userRepository.findByEmail(auth.getName()).orElseThrow();
@@ -30,13 +32,13 @@ public class AttendanceService {
 
         AttendanceValidation av = new AttendanceValidation();
         av.setAttendance(att);
-        av.setAttendanceId(att.getId());
         av.setValidator(validator);
         av.setDecision(ValidationDecision.validar);
         av.setValidatedAt(Instant.now().toString());
         attendanceValidationRepository.save(av);
     }
 
+    @Transactional
     public void reject(Long attendanceId, Authentication auth) {
         Attendance att = attendanceRepository.findById(attendanceId).orElseThrow();
         User validator = userRepository.findByEmail(auth.getName()).orElseThrow();
@@ -46,11 +48,9 @@ public class AttendanceService {
 
         AttendanceValidation av = new AttendanceValidation();
         av.setAttendance(att);
-        av.setAttendanceId(att.getId());
         av.setValidator(validator);
         av.setDecision(ValidationDecision.rejeitar);
         av.setValidatedAt(Instant.now().toString());
         attendanceValidationRepository.save(av);
     }
 }
-
