@@ -37,7 +37,24 @@ mvn -q -DskipTests=false verify
 - `spring.flyway.enabled`: `true`.
 
 ## Exemplos curl (placeholder)
-Nenhum endpoint disponibilizado nesta etapa.
+Autenticação (JWT):
+
+```bash
+# Login
+curl -s -X POST http://localhost:8080/api/v1/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"user@example.com","senha":"secret"}'
+
+# Refresh
+curl -s -X POST http://localhost:8080/api/v1/auth/refresh \
+  -H 'Content-Type: application/json' \
+  -d '{"refresh_token":"<REFRESH_TOKEN>"}'
+
+# Logout
+curl -i -X POST http://localhost:8080/api/v1/auth/logout \
+  -H 'Content-Type: application/json' \
+  -d '{"refresh_token":"<REFRESH_TOKEN>"}'
+```
 
 ## Plano (Etapa 1)
 1. Criar módulo `backend` (Spring Boot 3.3, Java 21).
@@ -48,4 +65,3 @@ Nenhum endpoint disponibilizado nesta etapa.
 
 ## Referências
 - docs/SPEC.md
-

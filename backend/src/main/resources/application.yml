@@ -27,3 +27,9 @@ logging:
     org.flywaydb: INFO
     org.hibernate.SQL: WARN
 
+security:
+  jwt:
+    # Use uma variável de ambiente forte em produção: JWT_SECRET
+    secret: ${JWT_SECRET:dev-change-me}
+    access-token-ttl-seconds: ${JWT_ACCESS_TTL:900}    # 15 min
+    refresh-token-ttl-seconds: ${JWT_REFRESH_TTL:1209600} # 14 dias

@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: jdbc:sqlite:file:memdb1?mode=memory&cache=shared
+    driver-class-name: org.sqlite.JDBC
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.community.dialect.SQLiteDialect
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  sql:
+    init:
+      mode: never
+
+logging:
+  level:
+    root: WARN
+
+security:
+  jwt:
+    secret: test-secret-please-change
+    access-token-ttl-seconds: 300
+    refresh-token-ttl-seconds: 600
+
