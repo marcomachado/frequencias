@@ -1,0 +1,15 @@
+# General
+.DS_Store
+.idea/
+.vscode/
+*.iml
+*.log
+
+# Maven/Build
+**/target/
+
+# Node (if present in workspace)
+node_modules/
+
+# SQLite data (optional local runs)
+data/
