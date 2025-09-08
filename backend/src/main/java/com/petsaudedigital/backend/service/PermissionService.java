@@ -16,6 +16,7 @@ import java.time.Instant;
 public class PermissionService {
     private final UserPermissionRepository userPermissionRepository;
     private final UserRepository userRepository;
+    private final AuditService auditService;
 
     public void grant(Authentication authentication, PermissionDtos.Grant req) {
         User target = userRepository.findById(req.userId()).orElseThrow();
@@ -32,11 +33,12 @@ public class PermissionService {
         up.setGrantedAt(Instant.now().toString());
 
         userPermissionRepository.save(up);
+        auditService.log(authentication, "grant_permission", "user_permission", target.getId(), req);
     }
 
     public void revoke(PermissionDtos.Revoke req) {
         UserPermission.Id id = new UserPermission.Id(req.userId(), req.permission(), req.scopeType(), req.scopeId());
         userPermissionRepository.deleteById(id);
+        auditService.log(null, "revoke_permission", "user_permission", req.userId(), req);
     }
 }
-
