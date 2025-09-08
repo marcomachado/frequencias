@@ -9,6 +9,8 @@ import com.petsaudedigital.backend.domain.Attendance;
 import com.petsaudedigital.backend.domain.enums.AttendanceStatus;
 import com.petsaudedigital.backend.repository.AttendanceRepository;
 import com.petsaudedigital.backend.repository.UserRepository;
+import com.petsaudedigital.backend.repository.SystemSettingRepository;
+import com.petsaudedigital.backend.repository.UserGtRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +25,8 @@ import java.util.List;
 public class TimesheetService {
     private final AttendanceRepository attendanceRepository;
     private final UserRepository userRepository;
+    private final SystemSettingRepository systemSettingRepository;
+    private final UserGtRepository userGtRepository;
 
     public TimesheetDtos.Summary compute(Long userId, String from, String to) {
         userRepository.findById(userId).orElseThrow();
@@ -36,7 +40,8 @@ public class TimesheetService {
                 }).toList();
         long totalMin = itens.stream().mapToLong(TimesheetDtos.Item::minutos).sum();
         double horas = Math.round((totalMin / 60.0) * 100.0) / 100.0;
-        boolean insuf = horas < 32.0; // padrão do SPEC
+        double minHoras = resolveMinHours(userId, from, to);
+        boolean insuf = horas < minHoras;
         return new TimesheetDtos.Summary(totalMin, horas, insuf, itens);
     }
 
@@ -70,5 +75,24 @@ public class TimesheetService {
         LocalTime f = LocalTime.parse(a.getActivity().getFim());
         return Duration.between(i, f).toMinutes();
     }
-}
 
+    private double resolveMinHours(Long userId, String from, String to) {
+        // Precedência: GT > AXIS > GLOBAL; fallback 32h
+        var ug = userGtRepository.findAll().stream().filter(x -> x.getUser().getId().equals(userId)).findFirst();
+        if (ug.isPresent()) {
+            var gtId = ug.get().getGt().getId();
+            var gtSet = systemSettingRepository.findByKeyAndScope("min_monthly_hours", "GT", gtId);
+            if (!gtSet.isEmpty()) return parseDouble(gtSet.get(0).getValue(), 32.0);
+            var axisId = ug.get().getGt().getAxis().getId();
+            var axSet = systemSettingRepository.findByKeyAndScope("min_monthly_hours", "AXIS", axisId);
+            if (!axSet.isEmpty()) return parseDouble(axSet.get(0).getValue(), 32.0);
+        }
+        var global = systemSettingRepository.findByKeyAndScope("min_monthly_hours", "GLOBAL", null);
+        if (!global.isEmpty()) return parseDouble(global.get(0).getValue(), 32.0);
+        return 32.0;
+    }
+
+    private double parseDouble(String s, double def) {
+        try { return Double.parseDouble(s); } catch (Exception e) { return def; }
+    }
+}
