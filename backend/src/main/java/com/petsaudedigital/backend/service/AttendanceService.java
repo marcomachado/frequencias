@@ -1,6 +1,7 @@
 package com.petsaudedigital.backend.service;
 
 import com.petsaudedigital.backend.domain.Attendance;
+import com.petsaudedigital.backend.domain.Activity;
 import com.petsaudedigital.backend.domain.AttendanceValidation;
 import com.petsaudedigital.backend.domain.User;
 import com.petsaudedigital.backend.domain.enums.ValidationDecision;
@@ -55,5 +56,30 @@ public class AttendanceService {
         av.setValidatedAt(Instant.now().toString());
         attendanceValidationRepository.save(av);
         auditService.log(auth, "reject_attendance", "attendance", att.getId(), null);
+    }
+
+    public UserRepository getUserRepository() { return userRepository; }
+
+    @Transactional
+    public Attendance createManual(Activity a, User u, Authentication auth) {
+        Attendance att = new Attendance();
+        att.setActivity(a);
+        att.setUser(u);
+        boolean isPrivileged = auth.getAuthorities().stream().anyMatch(ga -> ga.getAuthority().contains("coordenador") || ga.getAuthority().contains("tutor"));
+        att.setStatus(isPrivileged ? AttendanceStatus.validada : AttendanceStatus.pendente);
+        att.setModo(com.petsaudedigital.backend.domain.enums.AttendanceMode.manual);
+        att.setCreatedAt(java.time.Instant.now().toString());
+        return attendanceRepository.save(att);
+    }
+
+    @Transactional
+    public boolean deleteIfPending(Long id) {
+        return attendanceRepository.findById(id).map(att -> {
+            if (att.getStatus() == AttendanceStatus.pendente) {
+                attendanceRepository.delete(att);
+                return true;
+            }
+            return false;
+        }).orElse(false);
     }
 }
