@@ -13,3 +13,8 @@ node_modules/
 
 # SQLite data (optional local runs)
 data/
+
+.tools/
+.mvn/
+
+target/

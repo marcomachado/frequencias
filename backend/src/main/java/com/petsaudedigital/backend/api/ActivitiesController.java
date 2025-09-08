@@ -36,9 +36,11 @@ public class ActivitiesController {
     }
 
     @GetMapping("/api/v1/activities/{id}/attendances")
-    public ResponseEntity<List<Attendance>> listAttendances(@PathVariable Long id) {
+    public ResponseEntity<List<com.petsaudedigital.backend.api.dto.AttendanceDtos.View>> listAttendances(@PathVariable Long id) {
         Activity a = activityRepository.findById(id).orElseThrow();
-        return ResponseEntity.ok(attendanceRepository.findByActivity(a));
+        List<com.petsaudedigital.backend.api.dto.AttendanceDtos.View> out = attendanceRepository.findByActivity(a)
+                .stream().map(com.petsaudedigital.backend.api.dto.AttendanceDtos.View::from).toList();
+        return ResponseEntity.ok(out);
     }
 
     @PatchMapping("/api/v1/activities/{id}")

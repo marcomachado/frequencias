@@ -56,6 +56,7 @@ public class JwtService {
         Instant exp = now.plusSeconds(accessTtlSeconds);
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
                 .subject(email)
+                .jwtID(UUID.randomUUID().toString())
                 .issueTime(Date.from(now))
                 .expirationTime(Date.from(exp))
                 .claim("uid", userId)
@@ -111,4 +112,3 @@ public class JwtService {
         }
     }
 }
-

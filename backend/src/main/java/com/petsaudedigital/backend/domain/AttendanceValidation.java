@@ -12,10 +12,11 @@ import lombok.Setter;
 public class AttendanceValidation {
     @Id
     @Column(name = "attendance_id")
-    private Long attendanceId;
+    private Long id;
 
     @OneToOne
-    @JoinColumn(name = "attendance_id", insertable = false, updatable = false)
+    @MapsId
+    @JoinColumn(name = "attendance_id")
     private Attendance attendance;
 
     @ManyToOne(optional = false)
@@ -31,4 +32,3 @@ public class AttendanceValidation {
 
     private String note;
 }
-
