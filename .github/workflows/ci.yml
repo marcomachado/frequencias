@@ -9,9 +9,9 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+          cache: maven
       - name: Build & Test backend
+        working-directory: backend
         run: |
-          if [ -d "backend" ]; then cd backend; fi
           chmod +x mvnw || true
-          ./mvnw -q -DskipTests=false verify || mvn -q -DskipTests=false verify
-
+          ./mvnw -q -DskipTests=false verify
